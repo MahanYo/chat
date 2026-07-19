@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>چت‌روم | شبیه تلگرام</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.0.3/dist/font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: #0b0d17;
+            color: #f0f0f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+        .chat-app {
+            width: 100%;
+            max-width: 420px;
+            background: #131626;
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.06);
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            height: 90vh;
+            max-height: 700px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 16px 20px;
+            background: rgba(11, 13, 23, 0.9);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .chat-header .logo {
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #b388ff, #00e5ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .chat-header .user-id {
+            font-size: 0.75rem;
+            color: #a0a6c0;
+            background: rgba(255,255,255,0.06);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .chat-header .user-id i {
+            color: #4caf50;
+            font-size: 0.6rem;
+        }
+
+        .login-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            gap: 16px;
+        }
+        .login-screen .avatar-big {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #b388ff, #00e5ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .login-screen h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        .login-screen p {
+            color: #a0a6c0;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .login-screen input {
+            width: 100%;
+            max-width: 280px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+            font-family: 'Vazirmatn', sans-serif;
+            transition: 0.3s;
+        }
+        .login-screen input:focus {
+            border-color: #b388ff;
+            box-shadow: 0 0 0 4px rgba(179, 136, 255, 0.15);
+        }
+        .login-screen .login-btn {
+            padding: 12px 40px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(135deg, #b388ff, #00e5ff);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Vazirmatn', sans-serif;
+            width: 100%;
+            max-width: 280px;
+        }
+        .login-screen .login-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(179, 136, 255, 0.3);
+        }
+        .login-screen .login-error {
+            color: #ff4081;
+            font-size: 0.8rem;
+            display: none;
+        }
+        .login-screen .login-error.show {
+            display: block;
+        }
+
+        .chat-body {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+        }
+        .chat-body.active {
+            display: flex;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 16px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            scroll-behavior: smooth;
+        }
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #b388ff;
+            border-radius: 10px;
+        }
+
+        .chat-messages .msg {
+            max-width: 82%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            word-wrap: break-word;
+            animation: fadeIn 0.25s ease-out;
+            position: relative;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-messages .msg-other {
+            background: rgba(255,255,255,0.06);
+            color: #f0f0f5;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-messages .msg-self {
+            background: linear-gradient(135deg, #b388ff, #00e5ff);
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-messages .msg .msg-time {
+            font-size: 0.55rem;
+            opacity: 0.6;
+            margin-top: 4px;
+            display: block;
+        }
+        .chat-messages .msg-self .msg-time {
+            text-align: left;
+        }
+        .chat-messages .msg-other .msg-time {
+            text-align: right;
+        }
+
+        .chat-messages .system-msg {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #a0a6c0;
+            padding: 6px 0;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 10px 12px 14px;
+            background: rgba(11, 13, 23, 0.6);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .chat-input-area input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 25px;
+            padding: 10px 16px;
+            color: #f0f0f5;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            transition: 0.3s;
+        }
+        .chat-input-area input:focus {
+            border-color: #b388ff;
+            box-shadow: 0 0 0 4px rgba(179, 136, 255, 0.1);
+        }
+        .chat-input-area .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #b388ff, #00e5ff);
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-input-area .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(179, 136, 255, 0.3);
+        }
+        .chat-input-area .send-btn:active {
+            transform: scale(0.92);
+        }
+
+        .chat-footer {
+            padding: 8px 16px 12px;
+            text-align: center;
+            font-size: 0.6rem;
+            color: #a0a6c0;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            flex-shrink: 0;
+        }
+        .chat-footer .online-users {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .chat-footer .online-users span {
+            background: rgba(255,255,255,0.06);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.6rem;
+            color: #a0a6c0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .chat-footer .online-users span i {
+            color: #4caf50;
+            font-size: 0.4rem;
+        }
+
+        .online-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #4caf50;
+            border-radius: 50%;
+            margin-left: 4px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-app" id="chatApp">
+    <!-- هدر -->
+    <div class="chat-header">
+        <div class="logo"><i class="fas fa-comment-dots" style="color: #b388ff;"></i> چت‌روم</div>
+        <div class="user-id" id="userIdDisplay">
+            <i class="fas fa-circle"></i>
+            <span id="userIdText">وارد نشده</span>
+        </div>
+    </div>
+
+    <!-- صفحه ورود -->
+    <div class="login-screen" id="loginScreen">
+        <div class="avatar-big"><i class="fas fa-user"></i></div>
+        <h2>به چت‌روم خوش آمدید</h2>
+        <p>یک آیدی برای خودت انتخاب کن<br>و وارد چت شو!</p>
+        <input type="text" id="userIdInput" placeholder="مثلاً: mahan" maxlength="20" autofocus>
+        <div class="login-error" id="loginError">لطفاً یک آیدی وارد کن</div>
+        <button class="login-btn" id="loginBtn">ورود به چت</button>
+        <div style="font-size:0.7rem; color:#a0a6c0; margin-top:8px;">
+            <i class="fas fa-users"></i> کاربران آنلاین: <span id="onlineCount">0</span>
+        </div>
+    </div>
+
+    <!-- بخش چت -->
+    <div class="chat-body" id="chatBody">
+        <div class="chat-messages" id="chatMessages">
+            <div class="system-msg">به چت خوش آمدید! پیام‌ها را بفرستید...</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="پیام خود را بنویسید..." autocomplete="off">
+            <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div class="chat-footer">
+            <div class="online-users" id="onlineUsers"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ===== ذخیره‌سازی با localStorage =====
+        const STORAGE_KEY = 'chat_room_messages';
+        const USERS_KEY = 'chat_room_users';
+
+        let currentUserId = null;
+        let messages = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+
+        // ===== عناصر DOM =====
+        const loginScreen = document.getElementById('loginScreen');
+        const chatBody = document.getElementById('chatBody');
+        const userIdInput = document.getElementById('userIdInput');
+        const userIdDisplay = document.getElementById('userIdText');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const onlineUsers = document.getElementById('onlineUsers');
+        const onlineCount = document.getElementById('onlineCount');
+
+        // ===== ذخیره داده‌ها =====
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+
+        // ===== اضافه کردن کاربر =====
+        function addUser(userId) {
+            if (!users.includes(userId)) {
+                users.push(userId);
+                saveData();
+            }
+        }
+
+        // ===== حذف کاربر (وقتی صفحه بسته میشه) =====
+        function removeUser(userId) {
+            users = users.filter(u => u !== userId);
+            saveData();
+            updateOnlineUsers();
+        }
+
+        // ===== آپدیت کاربران آنلاین =====
+        function updateOnlineUsers() {
+            onlineUsers.innerHTML = users.map(u => 
+                `<span><i class="fas fa-circle"></i> ${u}</span>`
+            ).join('');
+            onlineCount.textContent = users.length;
+        }
+
+        // ===== اضافه کردن پیام =====
+        function addMessage(text, sender) {
+            const msg = {
+                id: Date.now(),
+                text: text,
+                sender: sender,
+                time: new Date().toISOString()
+            };
+            messages.push(msg);
+            saveData();
+            renderMessages();
+            // اسکرول به پایین
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // ===== رندر پیام‌ها =====
+        function renderMessages() {
+            chatMessages.innerHTML = '';
+            if (messages.length === 0) {
+                chatMessages.innerHTML = '<div class="system-msg">هنوز پیامی وجود ندارد</div>';
+                return;
+            }
+            messages.forEach(msg => {
+                const div = document.createElement('div');
+                const isSelf = msg.sender === currentUserId;
+                div.className = `msg ${isSelf ? 'msg-self' : 'msg-other'}`;
+                const timeStr = new Date(msg.time).toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
+                div.innerHTML = `${msg.text}<span class="msg-time">${timeStr} • ${msg.sender}</span>`;
+                chatMessages.appendChild(div);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // ===== ارسال پیام =====
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text || !currentUserId) return;
+            addMessage(text, currentUserId);
+            chatInput.value = '';
+            chatInput.focus();
+        }
+
+        // ===== ورود به چت =====
+        function login() {
+            const userId = userIdInput.value.trim();
+            if (!userId) {
+                loginError.classList.add('show');
+                return;
+            }
+            loginError.classList.remove('show');
+            currentUserId = userId;
+            addUser(userId);
+            userIdDisplay.textContent = userId;
+            loginScreen.style.display = 'none';
+            chatBody.classList.add('active');
+            renderMessages();
+            updateOnlineUsers();
+            chatInput.focus();
+        }
+
+        // ===== خروج از چت =====
+        function logout() {
+            if (currentUserId) {
+                removeUser(currentUserId);
+            }
+            currentUserId = null;
+            loginScreen.style.display = 'flex';
+            chatBody.classList.remove('active');
+            userIdInput.value = '';
+            userIdInput.focus();
+        }
+
+        // ===== رویدادها =====
+        loginBtn.addEventListener('click', login);
+        userIdInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') login();
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // ===== بستن صفحه =====
+        window.addEventListener('beforeunload', function() {
+            if (currentUserId) {
+                removeUser(currentUserId);
+            }
+        });
+
+        // ===== نمایش کاربران آنلاین هر 5 ثانیه =====
+        setInterval(() => {
+            // کاربران رو از localStorage دوباره بخون (برای همگام‌سازی)
+            users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+            updateOnlineUsers();
+            // پیام‌ها رو هم دوباره بخون
+            const newMessages = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            if (JSON.stringify(newMessages) !== JSON.stringify(messages)) {
+                messages = newMessages;
+                renderMessages();
+            }
+        }, 3000);
+
+        // ===== شروع =====
+        // چک کردن کاربران موجود
+        users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+        updateOnlineUsers();
+
+        console.log('💬 چت‌روم آماده است!');
+    })();
+</script>
+
+</body>
+</html>
